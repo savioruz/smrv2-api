@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=h1, initial-scale=1.0" />
+    <title>[No Reply] Verify Email - Smrv2</title>
+    <style>
+      body {
+        text-align: center;
+      }
+      .verify-btn {
+        background-color: #18181b;
+        border: 1px solid #27272a;
+        color: #ffffff;
+        padding: 8px 16px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 1.5;
+        margin: 4px 2px;
+        border-radius: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Your account has been created</h1>
+    <h3>Please click the button below to verify your email</h3>
+    <a href="{{.Link}}" class="verify-btn">
+      Verify Email
+    </a>
+    <p>If you're having trouble clicking the "Verify Email Address" button, copy and paste the URL below into your web browser:</p>
+    <p>{{.Link}}</p>
+    <p>If you didn't request this, please ignore this email.</p>
+    <p>Don't reply to this email.</p>
+  </body>
+</html>

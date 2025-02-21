@@ -1,0 +1,438 @@
+basePath: /api/v1
+definitions:
+  github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse:
+    properties:
+      errors:
+        additionalProperties:
+          items:
+            type: string
+          type: array
+        type: object
+      request_id:
+        type: string
+    type: object
+  github_com_savioruz_smrv2-api_internal_dao_model.Paging:
+    properties:
+      limit:
+        type: integer
+      page:
+        type: integer
+      total_count:
+        type: integer
+      total_page:
+        type: integer
+    type: object
+  ? github_com_savioruz_smrv2-api_internal_dao_model.Response-array_github_com_savioruz_smrv2-api_internal_dao_model_UserSchedulesResponse
+  : properties:
+      data:
+        items:
+          $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.UserSchedulesResponse'
+        type: array
+      error:
+        $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse'
+      paging:
+        $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.Paging'
+    type: object
+  github_com_savioruz_smrv2-api_internal_dao_model.Response-string:
+    properties:
+      data:
+        type: string
+      error:
+        $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse'
+      paging:
+        $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.Paging'
+    type: object
+  github_com_savioruz_smrv2-api_internal_dao_model.UserRefreshTokenResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  github_com_savioruz_smrv2-api_internal_dao_model.UserSchedulesResponse:
+    properties:
+      class_code:
+        type: string
+      course_code:
+        type: string
+      course_name:
+        type: string
+      day:
+        type: string
+      end_time:
+        type: string
+      lecturer:
+        type: string
+      room_number:
+        type: string
+      semester:
+        type: string
+      start_time:
+        type: string
+      study_program:
+        type: string
+    type: object
+  github_com_savioruz_smrv2-api_internal_dao_model.UserSchedulesSyncRequest:
+    properties:
+      message:
+        type: boolean
+    required:
+    - message
+    type: object
+  github_com_savioruz_smrv2-api_internal_dao_model.UsersLoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  github_com_savioruz_smrv2-api_internal_dao_model.UsersRefreshTokenRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  github_com_savioruz_smrv2-api_internal_dao_model.UsersRegisterRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  github_com_savioruz_smrv2-api_internal_dao_model.UsersRegisterResponse:
+    properties:
+      email:
+        type: string
+    type: object
+  github_com_savioruz_smrv2-api_internal_dao_model.UsersResponse:
+    properties:
+      id:
+        type: string
+      major:
+        type: string
+      name:
+        type: string
+      semester:
+        type: string
+    type: object
+info:
+  contact:
+    email: jakueenak@gmail.com
+    name: API Support
+  description: This is an auto-generated API Docs.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: smrv2-api
+  version: "0.1"
+paths:
+  /auth:
+    post:
+      consumes:
+      - application/json
+      description: Login to the system
+      parameters:
+      - description: Login Request
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.UsersLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.UsersResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse'
+      summary: Login
+      tags:
+      - Auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Refresh token
+      parameters:
+      - description: Refresh Token Request
+        in: body
+        name: refresh_token
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.UsersRefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.UserRefreshTokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse'
+      summary: Refresh Token
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user but sync data from portal
+      parameters:
+      - description: Register Request
+        in: body
+        name: register
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.UsersRegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.UsersRegisterResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse'
+      summary: Register
+      tags:
+      - Auth
+  /schedules:
+    get:
+      consumes:
+      - application/json
+      description: Get schedules
+      parameters:
+      - description: Study Program
+        in: query
+        name: study_program
+        type: string
+      - description: Course Code
+        in: query
+        name: course_code
+        type: string
+      - description: Class Code
+        in: query
+        name: class_code
+        type: string
+      - description: Course Name
+        in: query
+        name: course_name
+        type: string
+      - description: Day of Week
+        in: query
+        name: day_of_week
+        type: string
+      - description: Room Number
+        in: query
+        name: room_number
+        type: string
+      - description: Semester
+        in: query
+        name: semester
+        type: string
+      - description: Lecturer Name
+        in: query
+        name: lecturer_name
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: limit
+        type: integer
+      - description: Sort by field
+        enum:
+        - course_code
+        - class_code
+        - course_name
+        - credits
+        - day_of_week
+        - room_number
+        - semester
+        - start_time
+        - end_time
+        - lecturer_name
+        in: query
+        name: sort_by
+        type: string
+      - description: Sort order
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort_order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.Response-array_github_com_savioruz_smrv2-api_internal_dao_model_UserSchedulesResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse'
+      summary: Get schedules
+      tags:
+      - Schedule
+  /schedules/sync/all:
+    post:
+      consumes:
+      - application/json
+      description: Sync schedules
+      parameters:
+      - description: Sync Schedules Request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.UserSchedulesSyncRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.Response-string'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Sync schedules @admin
+      tags:
+      - Schedule
+  /user/schedules:
+    get:
+      consumes:
+      - application/json
+      description: Get user schedules
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: limit
+        type: integer
+      - description: Sort by field
+        enum:
+        - course_code
+        - class_code
+        - course_name
+        - credits
+        - day_of_week
+        - room_number
+        - semester
+        - start_time
+        - end_time
+        - lecturer_name
+        in: query
+        name: sort_by
+        type: string
+      - description: Sort order
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort_order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.Response-array_github_com_savioruz_smrv2-api_internal_dao_model_UserSchedulesResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get User Schedules
+      tags:
+      - User
+  /user/schedules/sync:
+    post:
+      consumes:
+      - application/json
+      description: Sync schedule
+      parameters:
+      - description: Sync Schedule Request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.UserSchedulesSyncRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.Response-string'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Sync Schedule
+      tags:
+      - User
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
