@@ -14,6 +14,8 @@ type UserHandler interface {
 	Login(ctx *fiber.Ctx) error
 	VerifyEmail(ctx *fiber.Ctx) error
 	RefreshToken(ctx *fiber.Ctx) error
+	ResetPassword(ctx *fiber.Ctx) error
+	ResetPasswordRequest(ctx *fiber.Ctx) error
 }
 
 type UserHandlerImpl struct {
@@ -129,13 +131,24 @@ func (h *UserHandlerImpl) RefreshToken(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.StatusOK).JSON(model.NewSuccessResponse(response, nil))
 }
 
+// @Summary Verify Email
+// @Description Verify email
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param token path string true "Token"
+// @Success 200 {object} model.Response[string]
+// @Failure 400 {object} model.ErrorResponse
+// @Failure 500 {object} model.ErrorResponse
+// @Router /auth/verify/{token} [get]
 func (h *UserHandlerImpl) VerifyEmail(ctx *fiber.Ctx) error {
 	request := new(model.UsersVerifyEmailRequest)
 	if err := ctx.ParamsParser(request); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(helper.SingleError("params", "INVALID_FORMAT"))
 	}
 
-	if err := h.UserService.VerifyEmail(ctx.Context(), request); err != nil {
+	response, err := h.UserService.VerifyEmail(ctx.Context(), request)
+	if err != nil {
 		errResp, ok := err.(*helper.ErrorResponse)
 		if !ok {
 			errResp = helper.ServerError(h.Log, err.Error())
@@ -148,8 +161,71 @@ func (h *UserHandlerImpl) VerifyEmail(ctx *fiber.Ctx) error {
 		return ctx.Status(status).JSON(errResp)
 	}
 
-	domain := h.Viper.GetString("MAIL_VERIFY_REDIRECT")
-	h.Log.Infof("Redirecting to: %s", domain)
+	return ctx.Status(fiber.StatusOK).JSON(response)
+}
 
-	return ctx.Redirect(domain, fiber.StatusTemporaryRedirect)
+// @Summary Reset Password
+// @Description Reset password
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param reset_password body model.UserResetPassword true "Reset Password Request"
+// @Success 200 {object} model.Response[string]
+// @Failure 400 {object} model.ErrorResponse
+// @Failure 500 {object} model.ErrorResponse
+// @Router /auth/reset [post]
+func (h *UserHandlerImpl) ResetPassword(ctx *fiber.Ctx) error {
+	request := new(model.UserResetPassword)
+	if err := ctx.BodyParser(request); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(helper.SingleError("body", "INVALID_FORMAT"))
+	}
+
+	response, err := h.UserService.ResetPassword(ctx.Context(), request)
+	if err != nil {
+		errResp, ok := err.(*helper.ErrorResponse)
+		if !ok {
+			errResp = helper.ServerError(h.Log, err.Error())
+		}
+
+		status := fiber.StatusInternalServerError
+		if errResp.RequestID == "" {
+			status = fiber.StatusBadRequest
+		}
+		return ctx.Status(status).JSON(errResp)
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(response)
+}
+
+// @Summary Reset Password Request
+// @Description Reset password request
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param reset_password_request body model.UserResetPasswordRequest true "Reset Password Request"
+// @Success 200 {object} model.Response[string]
+// @Failure 400 {object} model.ErrorResponse
+// @Failure 500 {object} model.ErrorResponse
+// @Router /auth/reset/request [post]
+func (h *UserHandlerImpl) ResetPasswordRequest(ctx *fiber.Ctx) error {
+	request := new(model.UserResetPasswordRequest)
+	if err := ctx.BodyParser(request); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(helper.SingleError("body", "INVALID_FORMAT"))
+	}
+
+	response, err := h.UserService.RequestResetPassword(ctx.Context(), request)
+	if err != nil {
+		errResp, ok := err.(*helper.ErrorResponse)
+		if !ok {
+			errResp = helper.ServerError(h.Log, err.Error())
+		}
+
+		status := fiber.StatusInternalServerError
+		if errResp.RequestID == "" {
+			status = fiber.StatusBadRequest
+		}
+		return ctx.Status(status).JSON(errResp)
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(response)
 }

@@ -21,6 +21,7 @@ type User struct {
 	ResetPasswordToken string         `gorm:"column:reset_password_token;default:NULL" json:"reset_password_token"`
 	VerificationToken  string         `gorm:"column:verification_token;default:NULL" json:"verification_token"`
 	IsVerified         bool           `gorm:"column:is_verified;not null" json:"is_verified"`
+	IsPortalVerified   bool           `gorm:"column:is_portal_verified;not null" json:"is_portal_verified"`
 	CreatedAt          time.Time      `gorm:"column:created_at;default:CURRENT_TIMESTAMP" json:"created_at"`
 	UpdatedAt          time.Time      `gorm:"column:updated_at;default:CURRENT_TIMESTAMP" json:"updated_at"`
 	DeletedAt          gorm.DeletedAt `gorm:"column:deleted_at" json:"deleted_at"`

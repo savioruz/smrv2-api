@@ -84,6 +84,17 @@ func (s *UserScheduleServiceImpl) GetSchedules(ctx context.Context, request *mod
 	}
 
 	userID := ctx.Value("userID").(string)
+	user, err := s.UserRepository.GetByID(s.DB, userID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, helper.SingleError("user", "NOT_FOUND")
+		}
+		return nil, helper.ServerError(s.Log, "failed to get user")
+	}
+
+	if !user.IsPortalVerified {
+		return nil, helper.SingleError("portal", "NOT_VERIFIED")
+	}
 
 	cacheKey := fmt.Sprintf("schedules:user=%s:page=%d:limit=%d:sort=%s:order=%s", userID, request.Page, request.Limit, request.Sort, request.Order)
 	var cacheResponse model.Response[[]model.UserSchedulesResponse]

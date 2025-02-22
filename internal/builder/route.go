@@ -44,18 +44,25 @@ func (c *Config) Build() {
 
 func (c *Config) PublicRoute() []Route {
 	return []Route{
+		// auth
 		{Method: "POST", Path: "/auth", Handler: c.UserHandler.Login},
 		{Method: "POST", Path: "/auth/register", Handler: c.UserHandler.Register},
 		{Method: "GET", Path: "/auth/verify/:token", Handler: c.UserHandler.VerifyEmail},
+		{Method: "POST", Path: "/auth/reset", Handler: c.UserHandler.ResetPassword},
+		{Method: "POST", Path: "/auth/reset/request", Handler: c.UserHandler.ResetPasswordRequest},
+		// schedules
 		{Method: "GET", Path: "/schedules", Handler: c.ScrapedScheduleHandler.GetSchedules},
+		// study
 		{Method: "GET", Path: "/study/programs", Handler: c.ScrapedScheduleHandler.GetStudyPrograms},
 	}
 }
 
 func (c *Config) PrivateRoute() []Route {
 	return []Route{
+		// user
 		{Method: "GET", Path: "/user/schedules", Handler: c.UserScheduleHandler.GetSchedules},
 		{Method: "POST", Path: "/user/schedules/sync", Handler: c.UserScheduleHandler.SyncSchedule},
+		// schedules
 		{Method: "POST", Path: "/schedules/sync/all", Handler: c.ScrapedScheduleHandler.SyncSchedules},
 	}
 }

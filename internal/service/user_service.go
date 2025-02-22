@@ -32,7 +32,9 @@ type UserService interface {
 	Register(ctx context.Context, request *model.UsersRegisterRequest) (*model.UsersRegisterResponse, error)
 	Login(ctx context.Context, request *model.UsersLoginRequest) (*model.UsersLoginResponse, error)
 	RefreshToken(ctx context.Context, request *model.UsersRefreshTokenRequest) (*model.UserRefreshTokenResponse, error)
-	VerifyEmail(ctx context.Context, request *model.UsersVerifyEmailRequest) error
+	VerifyEmail(ctx context.Context, request *model.UsersVerifyEmailRequest) (*model.Response[string], error)
+	RequestResetPassword(ctx context.Context, request *model.UserResetPasswordRequest) (*model.Response[string], error)
+	ResetPassword(ctx context.Context, request *model.UserResetPassword) (*model.Response[string], error)
 }
 
 type UserServiceImpl struct {
@@ -102,18 +104,6 @@ func (s *UserServiceImpl) Register(ctx context.Context, request *model.UsersRegi
 		return nil, helper.SingleError("email", "ALREADY_EXISTS")
 	}
 
-	// Verify portal credentials
-	nim := strings.Split(request.Email, "@")[0]
-	credentials := scrape.Identity{
-		NIM:      nim,
-		Password: request.Password,
-	}
-	err = scraper.Login(ctx, credentials)
-	if err != nil {
-		s.Log.Errorf("Failed to login: %v", err)
-		return nil, helper.SingleError("credentials", "INVALID")
-	}
-
 	// Using encryption because we need to reuse it in the future
 	password, err := helper.EncryptPassword(s.Viper, request.Password)
 	if err != nil {
@@ -150,6 +140,7 @@ func (s *UserServiceImpl) Register(ctx context.Context, request *model.UsersRegi
 
 	// Create user
 	id := uuid.NewString()
+	nim := strings.Split(request.Email, "@")[0]
 	if err := s.UserRepository.Create(tx, &entity.User{
 		ID:                id,
 		Email:             request.Email,
@@ -176,7 +167,6 @@ func (s *UserServiceImpl) Register(ctx context.Context, request *model.UsersRegi
 		return nil, helper.ServerError(s.Log, "Failed to publish study data request")
 	}
 
-	// @TODO: insert into subscription table
 	if err := s.SubscriptionRepository.Create(tx, &entity.Subscription{
 		UserID:    id,
 		PlanType:  string(model.SubscriptionPlanFree),
@@ -277,9 +267,9 @@ func (s *UserServiceImpl) RefreshToken(ctx context.Context, request *model.Users
 	}, nil
 }
 
-func (s *UserServiceImpl) VerifyEmail(ctx context.Context, request *model.UsersVerifyEmailRequest) error {
+func (s *UserServiceImpl) VerifyEmail(ctx context.Context, request *model.UsersVerifyEmailRequest) (*model.Response[string], error) {
 	if err := s.Validator.Struct(request); err != nil {
-		return helper.ValidationError(err)
+		return nil, helper.ValidationError(err)
 	}
 
 	tx := s.DB.WithContext(ctx).Begin()
@@ -288,23 +278,125 @@ func (s *UserServiceImpl) VerifyEmail(ctx context.Context, request *model.UsersV
 	user, err := s.UserRepository.GetByVerificationToken(tx, request.Token)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return helper.SingleError("token", "INVALID")
+			return nil, helper.SingleError("token", "INVALID")
 		}
-		return helper.ServerError(s.Log, "Failed to get user")
+		return nil, helper.ServerError(s.Log, "Failed to get user")
 	}
 
 	if user.IsVerified {
-		return helper.SingleError("user", "ALREADY_VERIFIED")
+		return nil, helper.SingleError("user", "ALREADY_VERIFIED")
 	}
 
 	user.IsVerified = true
 	if err := s.UserRepository.Update(tx, user); err != nil {
-		return helper.ServerError(s.Log, "Failed to update user")
+		return nil, helper.ServerError(s.Log, "Failed to update user")
 	}
 
 	if err := tx.Commit().Error; err != nil {
-		return helper.ServerError(s.Log, "Failed to commit transaction")
+		return nil, helper.ServerError(s.Log, "Failed to commit transaction")
 	}
 
-	return nil
+	message := "Email verified successfully"
+	return &model.Response[string]{
+		Data: &message,
+	}, nil
+}
+
+func (s *UserServiceImpl) ResetPassword(ctx context.Context, request *model.UserResetPassword) (*model.Response[string], error) {
+	if err := s.Validator.Struct(request); err != nil {
+		return nil, helper.ValidationError(err)
+	}
+
+	tx := s.DB.WithContext(ctx).Begin()
+	defer tx.Rollback()
+
+	user, err := s.UserRepository.GetByResetPasswordToken(tx, request.Token)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, helper.SingleError("token", "INVALID")
+		}
+		return nil, helper.ServerError(s.Log, "Failed to get user")
+	}
+
+	user.Password = request.Password
+	if err := s.UserRepository.Update(tx, user); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, helper.SingleError("user", "NOT_FOUND")
+		}
+		return nil, helper.ServerError(s.Log, "Failed to update user")
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, helper.ServerError(s.Log, "Failed to commit transaction")
+	}
+
+	message := "Password reset successfully. Please login again."
+	return &model.Response[string]{
+		Data: &message,
+	}, nil
+}
+
+func (s *UserServiceImpl) RequestResetPassword(ctx context.Context, request *model.UserResetPasswordRequest) (*model.Response[string], error) {
+	if err := s.Validator.Struct(request); err != nil {
+		return nil, helper.ValidationError(err)
+	}
+
+	tx := s.DB.WithContext(ctx).Begin()
+	defer tx.Rollback()
+
+	user, err := s.UserRepository.GetByEmail(tx, request.Email)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, helper.SingleError("user", "NOT_FOUND")
+		}
+		return nil, helper.ServerError(s.Log, "Failed to get user")
+	}
+
+	resetPasswordToken := uuid.NewString()
+	user.ResetPasswordToken = resetPasswordToken
+	if err := s.UserRepository.Update(tx, user); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, helper.SingleError("user", "NOT_FOUND")
+		}
+		return nil, helper.ServerError(s.Log, "Failed to update user")
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, helper.ServerError(s.Log, "Failed to commit transaction")
+	}
+
+	// Email template preparation
+	var replaceEmail = struct {
+		Link string
+	}{
+		Link: fmt.Sprintf("%s/auth/reset/%s", s.Viper.GetString("APP_DOMAIN"), resetPasswordToken),
+	}
+
+	tmpl, err := template.ParseFS(templateFS, "template/verify_email.html")
+	if err != nil {
+		s.Log.Errorf("failed to parse template: %v", err)
+		return nil, helper.ServerError(s.Log, "Failed to parse template")
+	}
+	var body bytes.Buffer
+	if err := tmpl.Execute(&body, &replaceEmail); err != nil {
+		s.Log.Errorf("failed to execute template: %v", err)
+		return nil, helper.ServerError(s.Log, "Failed to execute template")
+	}
+
+	// Send email through message queue
+	emailMessage := &messaging.EmailMessage{
+		To:      request.Email,
+		From:    s.Mail.GetFromEmail(),
+		Subject: "[Smrv2] Reset your password",
+		Body:    body.String(),
+	}
+
+	if err := s.MailProducer.PublishEmailSending(ctx, emailMessage); err != nil {
+		return nil, helper.ServerError(s.Log, "Failed to queue email sending for reset password")
+	}
+
+	message := "Password reset request sent. Please check your email for the reset link."
+	return &model.Response[string]{
+		Data: &message,
+	}, nil
 }
