@@ -147,6 +147,12 @@ func (s *ScrapedScheduleServiceImpl) GetSchedules(ctx context.Context, request *
 		return nil, helper.ServerError(s.Log, "failed to get schedules")
 	}
 
+	if ctx.Value("userID") == nil {
+		for i := range schedules {
+			schedules[i].LecturerName = helper.TrimLecturerName(schedules[i].LecturerName)
+		}
+	}
+
 	schedulesResponse := make([]model.UserSchedulesResponse, len(schedules))
 	for i := range schedules {
 		schedulesResponse[i] = model.UserSchedulesResponse{
