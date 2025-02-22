@@ -1,8 +1,6 @@
 package config
 
 import (
-	"strings"
-
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
@@ -11,9 +9,17 @@ func NewLogrus(v *viper.Viper) *logrus.Logger {
 	log := logrus.New()
 	env := v.GetString("APP_ENV")
 
-	if strings.ToUpper(env) == "PRODUCTION" {
+	if env == "production" {
 		log.SetFormatter(
-			&logrus.JSONFormatter{},
+			&logrus.JSONFormatter{
+				TimestampFormat: "2006-01-02 15:04:05",
+				FieldMap: logrus.FieldMap{
+					logrus.FieldKeyTime:  "@timestamp",
+					logrus.FieldKeyLevel: "@level",
+					logrus.FieldKeyMsg:   "@message",
+					logrus.FieldKeyFunc:  "@caller",
+				},
+			},
 		)
 	}
 
