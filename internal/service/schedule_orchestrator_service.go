@@ -42,6 +42,9 @@ func (s *ScheduleOrchestratorServiceImpl) RunScheduleScraping(ctx context.Contex
 
 	// Get study programs
 	scraper := scrape.NewScrape(1000)
+	if err := scraper.Initialize(); err != nil {
+		return fmt.Errorf("failed to initialize scraper: %w", err)
+	}
 	defer scraper.Cleanup()
 
 	studyPrograms, err := scraper.GetStudyPrograms(ctx)
