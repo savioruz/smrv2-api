@@ -64,8 +64,8 @@ func (c *Config) SwaggerRoute() {
 	r.Get("*", swagger.HandlerDefault)
 }
 
-func (c *Config) NotFoundRoute() fiber.Handler {
-	return func(ctx *fiber.Ctx) error {
+func (c *Config) NotFoundRoute() {
+	c.App.Use(func(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusNotFound).JSON(helper.SingleError("route", "NOT_FOUND"))
-	}
+	})
 }

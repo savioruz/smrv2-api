@@ -8,12 +8,20 @@ import (
 )
 
 type Scrape struct {
-	ctx    context.Context
-	cancel context.CancelFunc
+	timeout int
+	ctx     context.Context
+	cancel  context.CancelFunc
 }
 
 // NewScrape creates a new scraper with initialized ChromeDP context
 func NewScrape(timeout int) *Scrape {
+	return &Scrape{
+		timeout: timeout,
+	}
+}
+
+// Initialize sets up the ChromeDP context
+func (s *Scrape) Initialize() error {
 	opts := append(
 		chromedp.DefaultExecAllocatorOptions[:],
 		chromedp.UserAgent("Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0"),
@@ -29,12 +37,11 @@ func NewScrape(timeout int) *Scrape {
 
 	// Create context with timeout
 	ctx, _ := chromedp.NewContext(allocCtx)
-	ctx, cancel = context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
+	ctx, cancel = context.WithTimeout(ctx, time.Duration(s.timeout)*time.Second)
 
-	return &Scrape{
-		ctx:    ctx,
-		cancel: cancel,
-	}
+	s.ctx = ctx
+	s.cancel = cancel
+	return nil
 }
 
 func (s *Scrape) Cleanup() {
