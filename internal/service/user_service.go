@@ -369,7 +369,7 @@ func (s *UserServiceImpl) RequestResetPassword(ctx context.Context, request *mod
 	var replaceEmail = struct {
 		Link string
 	}{
-		Link: fmt.Sprintf("%s/auth/reset/%s", s.Viper.GetString("APP_DOMAIN"), resetPasswordToken),
+		Link: fmt.Sprintf("%s/api/v1/auth/reset/%s", s.Viper.GetString("APP_DOMAIN"), resetPasswordToken),
 	}
 
 	tmpl, err := template.ParseFS(templateFS, "template/verify_email.html")
