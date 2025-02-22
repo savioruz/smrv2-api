@@ -64,6 +64,7 @@ func (s *StudyPlansServiceImpl) ProcessStudyData(ctx context.Context, studentDat
 	// Update user data
 	user.Name = studentData.Name
 	user.Major = studentData.Major
+	user.IsPortalVerified = true
 	if err := s.UserRepository.Update(tx, user); err != nil {
 		return helper.ServerError(s.Log, "failed to update user data")
 	}

@@ -12,6 +12,7 @@ type UsersRepository interface {
 	GetByNIM(db *gorm.DB, nim string) (*entity.User, error)
 	GetByEmail(db *gorm.DB, email string) (*entity.User, error)
 	GetByVerificationToken(db *gorm.DB, token string) (*entity.User, error)
+	GetByResetPasswordToken(db *gorm.DB, token string) (*entity.User, error)
 }
 
 type UserRepositoryImpl struct {
@@ -55,6 +56,14 @@ func (r *UserRepositoryImpl) GetByEmail(db *gorm.DB, email string) (*entity.User
 func (r *UserRepositoryImpl) GetByVerificationToken(db *gorm.DB, token string) (*entity.User, error) {
 	var user entity.User
 	if err := db.Where("verification_token = ?", token).First(&user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (r *UserRepositoryImpl) GetByResetPasswordToken(db *gorm.DB, token string) (*entity.User, error) {
+	var user entity.User
+	if err := db.Where("reset_password_token = ?", token).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil

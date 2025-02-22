@@ -38,3 +38,18 @@ type UserRefreshTokenResponse struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
 }
+
+type PortalVerificationMessage struct {
+	UserID   string `json:"user_id"`
+	NIM      string `json:"nim"`
+	Password string `json:"password"`
+}
+
+type UserResetPasswordRequest struct {
+	Email string `json:"email" validate:"required,email"`
+}
+
+type UserResetPassword struct {
+	Token    string `json:"token" validate:"required"`
+	Password string `json:"password" validate:"required"`
+}
