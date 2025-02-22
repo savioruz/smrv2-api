@@ -14,7 +14,7 @@ COPY . .
 
 # Set necessary environment variables needed for our image and build the API server.
 ENV CGO_ENABLED=0 GOOS=linux GOARCH=amd64
-RUN go build -ldflags="-s -w" -o smrv2-api .
+RUN go build -ldflags="-s -w" -o smrv2-api ./cmd/app/main.go
 
 # Stage 2: Setup the runtime environment
 FROM debian:bullseye-slim
