@@ -16,6 +16,7 @@ type ScrapedScheduleRepository interface {
 	Repository[entity.ScrapedSchedule]
 	Exists(ctx context.Context) (bool, error)
 	GetByCode(ctx context.Context, courseCode, classCode string) ([]*entity.ScrapedSchedule, error)
+	GetStudyPrograms(ctx context.Context) ([]*model.StudyProgram, error)
 	GetSchedules(ctx context.Context, request *model.ScrapedScheduleRequest) ([]*entity.ScrapedSchedule, int64, error)
 }
 
@@ -31,6 +32,16 @@ func NewScrapedScheduleRepository(db *gorm.DB, log *logrus.Logger) *ScrapedSched
 		},
 		Log: log,
 	}
+}
+
+func (r *ScrapedScheduleRepositoryImpl) GetStudyPrograms(ctx context.Context) ([]*model.StudyProgram, error) {
+	var studyPrograms []*model.StudyProgram
+	if err := r.DB.WithContext(ctx).
+		Raw("SELECT DISTINCT study_program as name FROM scraped_schedules ORDER BY study_program").
+		Scan(&studyPrograms).Error; err != nil {
+		return nil, err
+	}
+	return studyPrograms, nil
 }
 
 func (r *ScrapedScheduleRepositoryImpl) Exists(ctx context.Context) (bool, error) {

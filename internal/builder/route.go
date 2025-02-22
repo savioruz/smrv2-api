@@ -48,6 +48,7 @@ func (c *Config) PublicRoute() []Route {
 		{Method: "POST", Path: "/auth/register", Handler: c.UserHandler.Register},
 		{Method: "GET", Path: "/auth/verify/:token", Handler: c.UserHandler.VerifyEmail},
 		{Method: "GET", Path: "/schedules", Handler: c.ScrapedScheduleHandler.GetSchedules},
+		{Method: "GET", Path: "/study/programs", Handler: c.ScrapedScheduleHandler.GetStudyPrograms},
 	}
 }
 

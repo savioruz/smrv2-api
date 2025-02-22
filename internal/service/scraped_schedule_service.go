@@ -21,6 +21,7 @@ import (
 )
 
 type ScrapedScheduleService interface {
+	GetStudyPrograms(ctx context.Context) (*model.Response[[]model.StudyProgram], error)
 	SaveScrapedSchedule(ctx context.Context, schedule *entity.ScrapedSchedule) error
 	GetSchedules(ctx context.Context, request *model.ScrapedScheduleRequest) (*model.Response[[]model.UserSchedulesResponse], error)
 	SyncSchedules(ctx context.Context, request *model.UserSchedulesSyncRequest) (*model.Response[string], error)
@@ -63,6 +64,39 @@ func (s *ScrapedScheduleServiceImpl) SetOrchestrator(orchestrator ScheduleOrches
 	s.ScheduleOrchestrator = orchestrator
 }
 
+func (s *ScrapedScheduleServiceImpl) GetStudyPrograms(ctx context.Context) (*model.Response[[]model.StudyProgram], error) {
+	studyPrograms, err := s.ScrapedScheduleRepository.GetStudyPrograms(ctx)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, helper.SingleError("study programs", "NOT_FOUND")
+		}
+		return nil, helper.ServerError(s.Log, "failed to get study programs")
+	}
+
+	cacheKey := "study_programs:all"
+	var cacheResponse model.Response[[]model.StudyProgram]
+	if err := s.Cache.Get(cacheKey, &cacheResponse); err == nil {
+		return &cacheResponse, nil
+	}
+
+	studyProgramsResponse := make([]model.StudyProgram, len(studyPrograms))
+	for i := range studyPrograms {
+		studyProgramsResponse[i] = model.StudyProgram{
+			ID:   uint8(i + 1),
+			Name: studyPrograms[i].Name,
+		}
+	}
+
+	response := model.Response[[]model.StudyProgram]{
+		Data: &studyProgramsResponse,
+	}
+
+	if err := s.Cache.Set(cacheKey, response, 10*time.Minute); err != nil {
+		s.Log.Errorf("failed to set cache: %v", err)
+	}
+
+	return &response, nil
+}
 func (s *ScrapedScheduleServiceImpl) SaveScrapedSchedule(ctx context.Context, schedule *entity.ScrapedSchedule) error {
 	if !s.isValidSchedule(schedule) {
 		s.Log.Infof("Skipping invalid schedule: %s-%s", schedule.CourseCode, schedule.ClassCode)

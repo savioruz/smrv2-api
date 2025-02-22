@@ -9,6 +9,11 @@ type StudyProgramMessage struct {
 	Program   string `json:"program"`
 }
 
+type StudyProgram struct {
+	ID   uint8  `json:"id"`
+	Name string `json:"name"`
+}
+
 type ScheduleMessage struct {
 	FacultyID    string          `json:"faculty_id"`
 	ProgramID    string          `json:"program_id"`
