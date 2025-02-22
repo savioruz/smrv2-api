@@ -147,6 +147,10 @@ func (s *UserScheduleServiceImpl) SyncSchedules(ctx context.Context, request *mo
 		return nil, helper.ServerError(s.Log, "failed to get user")
 	}
 
+	if !user.IsPortalVerified {
+		return nil, helper.SingleError("portal", "NOT_VERIFIED")
+	}
+
 	// decrypt password
 	password, err := helper.DecryptPassword(s.Viper, user.Password)
 	if err != nil {
