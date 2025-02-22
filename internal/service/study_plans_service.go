@@ -26,7 +26,6 @@ type StudyPlansServiceImpl struct {
 	StudyRepository        *repository.StudyPlansRepositoryImpl
 	UserScheduleRepository *repository.UserScheduleRepositoryImpl
 	Producer               *messaging.UserProducer
-	scraper                *scrape.Scrape
 }
 
 func NewStudyService(
@@ -46,7 +45,6 @@ func NewStudyService(
 		StudyRepository:        studyRepository,
 		UserScheduleRepository: userScheduleRepository,
 		Producer:               producer,
-		scraper:                scrape.NewScrape(10),
 	}
 }
 

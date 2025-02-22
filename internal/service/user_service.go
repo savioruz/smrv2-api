@@ -46,7 +46,6 @@ type UserServiceImpl struct {
 	UserProducer           *messaging.UserProducer
 	Mail                   *mail.ImplGomail
 	Jwt                    *jwt.JWTServiceImpl
-	scraper                *scrape.Scrape
 }
 
 func NewUserService(
@@ -72,7 +71,6 @@ func NewUserService(
 		UserProducer:           userProducer,
 		Mail:                   mail,
 		Jwt:                    jwt,
-		scraper:                scrape.NewScrape(30),
 	}
 }
 
@@ -87,6 +85,13 @@ func (s *UserServiceImpl) Register(ctx context.Context, request *model.UsersRegi
 
 	tx := s.DB.WithContext(ctx).Begin()
 	defer tx.Rollback()
+
+	// Initialize scraperNewScrape(30)
+	scraper := scrape.NewScrape(30)
+	if err := scraper.Initialize(); err != nil {
+		return nil, helper.ServerError(s.Log, "Failed to initialize scraper")
+	}
+	defer scraper.Cleanup()
 
 	// Check if user exists
 	user, err := s.UserRepository.GetByEmail(tx, request.Email)
@@ -103,7 +108,7 @@ func (s *UserServiceImpl) Register(ctx context.Context, request *model.UsersRegi
 		NIM:      nim,
 		Password: request.Password,
 	}
-	err = s.scraper.Login(ctx, credentials)
+	err = scraper.Login(ctx, credentials)
 	if err != nil {
 		s.Log.Errorf("Failed to login: %v", err)
 		return nil, helper.SingleError("credentials", "INVALID")
@@ -116,7 +121,6 @@ func (s *UserServiceImpl) Register(ctx context.Context, request *model.UsersRegi
 	}
 
 	verifyToken := uuid.NewString()
-	s.Log.Infof("Verify token: %s", verifyToken)
 
 	// Email template preparation
 	var replaceEmail = struct {

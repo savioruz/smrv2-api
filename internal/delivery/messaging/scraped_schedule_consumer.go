@@ -53,6 +53,10 @@ func (c *ScrapedScheduleConsumer) ConsumeScrapeRequests(ctx context.Context) err
 		}
 
 		scraper := scrape.NewScrape(1000)
+		if err := scraper.Initialize(); err != nil {
+			c.log.Errorf("Failed to initialize scraper when processing study program %s: %v", message.Program, err)
+			return err
+		}
 		defer scraper.Cleanup()
 
 		schedules, err := scraper.GetSchedule(ctx, message.FacultyID, message.ProgramID)
