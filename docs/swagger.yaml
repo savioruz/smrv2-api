@@ -22,6 +22,17 @@ definitions:
       total_page:
         type: integer
     type: object
+  github_com_savioruz_smrv2-api_internal_dao_model.Response-array_github_com_savioruz_smrv2-api_internal_dao_model_StudyProgram:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.StudyProgram'
+        type: array
+      error:
+        $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse'
+      paging:
+        $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.Paging'
+    type: object
   ? github_com_savioruz_smrv2-api_internal_dao_model.Response-array_github_com_savioruz_smrv2-api_internal_dao_model_UserSchedulesResponse
   : properties:
       data:
@@ -41,6 +52,13 @@ definitions:
         $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse'
       paging:
         $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.Paging'
+    type: object
+  github_com_savioruz_smrv2-api_internal_dao_model.StudyProgram:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
     type: object
   github_com_savioruz_smrv2-api_internal_dao_model.UserRefreshTokenResponse:
     properties:
@@ -342,6 +360,29 @@ paths:
       summary: Sync schedules @admin
       tags:
       - Schedule
+  /study/programs:
+    get:
+      consumes:
+      - application/json
+      description: Get study programs
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.Response-array_github_com_savioruz_smrv2-api_internal_dao_model_StudyProgram'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse'
+      summary: Get study programs
+      tags:
+      - Study
   /user/schedules:
     get:
       consumes:

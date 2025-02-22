@@ -337,6 +337,41 @@ const docTemplate = `{
                 }
             }
         },
+        "/study/programs": {
+            "get": {
+                "description": "Get study programs",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Study"
+                ],
+                "summary": "Get study programs",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.Response-array_github_com_savioruz_smrv2-api_internal_dao_model_StudyProgram"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/user/schedules": {
             "get": {
                 "security": [
@@ -506,6 +541,23 @@ const docTemplate = `{
                 }
             }
         },
+        "github_com_savioruz_smrv2-api_internal_dao_model.Response-array_github_com_savioruz_smrv2-api_internal_dao_model_StudyProgram": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.StudyProgram"
+                    }
+                },
+                "error": {
+                    "$ref": "#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse"
+                },
+                "paging": {
+                    "$ref": "#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.Paging"
+                }
+            }
+        },
         "github_com_savioruz_smrv2-api_internal_dao_model.Response-array_github_com_savioruz_smrv2-api_internal_dao_model_UserSchedulesResponse": {
             "type": "object",
             "properties": {
@@ -534,6 +586,17 @@ const docTemplate = `{
                 },
                 "paging": {
                     "$ref": "#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.Paging"
+                }
+            }
+        },
+        "github_com_savioruz_smrv2-api_internal_dao_model.StudyProgram": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         },

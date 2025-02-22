@@ -11,6 +11,7 @@ import (
 type ScrapedScheduleHandler interface {
 	GetSchedules(ctx *fiber.Ctx) error
 	SyncSchedules(ctx *fiber.Ctx) error
+	GetStudyPrograms(ctx *fiber.Ctx) error
 }
 
 type ScrapedScheduleHandlerImpl struct {
@@ -114,6 +115,33 @@ func (h *ScrapedScheduleHandlerImpl) SyncSchedules(ctx *fiber.Ctx) error {
 		errResp, ok := err.(*helper.ErrorResponse)
 		if !ok {
 			errResp = helper.ServerError(h.Log, err.Error())
+		}
+
+		status := fiber.StatusInternalServerError
+		if errResp.RequestID == "" {
+			status = fiber.StatusBadRequest
+		}
+		return ctx.Status(status).JSON(errResp)
+	}
+
+	return ctx.JSON(response)
+}
+
+// @Summary Get study programs
+// @Description Get study programs
+// @Tags Study
+// @Accept json
+// @Produce json
+// @Success 200 {object} model.Response[[]model.StudyProgram]
+// @Failure 400 {object} model.ErrorResponse
+// @Failure 500 {object} model.ErrorResponse
+// @Router /study/programs [get]
+func (h *ScrapedScheduleHandlerImpl) GetStudyPrograms(ctx *fiber.Ctx) error {
+	response, err := h.ScrapedScheduleService.GetStudyPrograms(ctx.Context())
+	if err != nil {
+		errResp, ok := err.(*helper.ErrorResponse)
+		if !ok {
+			errResp = helper.ServerError(h.Log, "failed to get study programs")
 		}
 
 		status := fiber.StatusInternalServerError
