@@ -103,8 +103,8 @@ func (r *ScrapedScheduleRepositoryImpl) GetSchedules(ctx context.Context, reques
 		query = query.Where("lecturer_name ILIKE ?", "%"+request.LecturerName+"%")
 	}
 
-	// Get total count with filters
-	if err := query.Count(&totalCount).Error; err != nil {
+	countQuery := query
+	if err := countQuery.Count(&totalCount).Error; err != nil {
 		return nil, 0, err
 	}
 
