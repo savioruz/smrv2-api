@@ -51,7 +51,8 @@ func (r *UserScheduleRepositoryImpl) GetSchedules(ctx context.Context, userID st
 			ss.room_number,
 			ss.lecturer_name AS lecturer,
 			ss.study_program,
-			ss.semester
+			ss.semester,
+			ss.credits
 		FROM user_schedules us
 		JOIN study_plans sp ON us.study_plan_id = sp.id
 		JOIN scraped_schedules ss ON us.course_code = ss.course_code 

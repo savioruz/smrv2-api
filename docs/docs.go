@@ -161,6 +161,142 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/reset": {
+            "post": {
+                "description": "Reset password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Reset Password",
+                "parameters": [
+                    {
+                        "description": "Reset Password Request",
+                        "name": "reset_password",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.UserResetPassword"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.Response-string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/reset/request": {
+            "post": {
+                "description": "Reset password request",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Reset Password Request",
+                "parameters": [
+                    {
+                        "description": "Reset Password Request",
+                        "name": "reset_password_request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.UserResetPasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.Response-string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/verify/{token}": {
+            "get": {
+                "description": "Verify email",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Verify Email",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token",
+                        "name": "token",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.Response-string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/schedules": {
             "get": {
                 "description": "Get schedules",
@@ -611,6 +747,32 @@ const docTemplate = `{
                 }
             }
         },
+        "github_com_savioruz_smrv2-api_internal_dao_model.UserResetPassword": {
+            "type": "object",
+            "required": [
+                "password",
+                "token"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_savioruz_smrv2-api_internal_dao_model.UserResetPasswordRequest": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                }
+            }
+        },
         "github_com_savioruz_smrv2-api_internal_dao_model.UserSchedulesResponse": {
             "type": "object",
             "properties": {
@@ -622,6 +784,9 @@ const docTemplate = `{
                 },
                 "course_name": {
                     "type": "string"
+                },
+                "credits": {
+                    "type": "integer"
                 },
                 "day": {
                     "type": "string"
