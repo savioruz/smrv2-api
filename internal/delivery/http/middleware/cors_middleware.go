@@ -7,7 +7,7 @@ import (
 
 func CorsMiddleware(a *fiber.App) {
 	a.Use(cors.New(cors.Config{
-		AllowOrigins: "https://simeru.vercel.app, https://simeru-scraper.koyeb.app",
+		AllowOrigins: "*",
 		AllowHeaders: "Origin, Content-Type, Accept",
 		AllowMethods: "GET,POST,OPTIONS",
 	}))
