@@ -200,6 +200,7 @@ func (s *ScrapedScheduleServiceImpl) GetSchedules(ctx context.Context, request *
 			Lecturer:     schedules[i].LecturerName,
 			StudyProgram: schedules[i].StudyProgram,
 			Semester:     schedules[i].Semester,
+			Credits:      int32(schedules[i].Credits),
 		}
 	}
 
