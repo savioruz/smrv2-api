@@ -27,6 +27,8 @@ type Route struct {
 func (c *Config) Build() {
 	authMiddleware := middleware.NewAuthMiddleware(c.Jwt)
 	c.App.Use(recover.New())
+	middleware.CorsMiddleware(c.App)
+	middleware.LimiterMiddleware(c.App)
 
 	g := c.App.Group("/api/v1")
 
