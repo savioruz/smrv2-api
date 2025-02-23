@@ -67,6 +67,23 @@ definitions:
       refresh_token:
         type: string
     type: object
+  github_com_savioruz_smrv2-api_internal_dao_model.UserResetPassword:
+    properties:
+      password:
+        type: string
+      token:
+        type: string
+    required:
+    - password
+    - token
+    type: object
+  github_com_savioruz_smrv2-api_internal_dao_model.UserResetPasswordRequest:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
   github_com_savioruz_smrv2-api_internal_dao_model.UserSchedulesResponse:
     properties:
       class_code:
@@ -75,6 +92,8 @@ definitions:
         type: string
       course_name:
         type: string
+      credits:
+        type: integer
       day:
         type: string
       end_time:
@@ -240,6 +259,95 @@ paths:
           schema:
             $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse'
       summary: Register
+      tags:
+      - Auth
+  /auth/reset:
+    post:
+      consumes:
+      - application/json
+      description: Reset password
+      parameters:
+      - description: Reset Password Request
+        in: body
+        name: reset_password
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.UserResetPassword'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.Response-string'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse'
+      summary: Reset Password
+      tags:
+      - Auth
+  /auth/reset/request:
+    post:
+      consumes:
+      - application/json
+      description: Reset password request
+      parameters:
+      - description: Reset Password Request
+        in: body
+        name: reset_password_request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.UserResetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.Response-string'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse'
+      summary: Reset Password Request
+      tags:
+      - Auth
+  /auth/verify/{token}:
+    get:
+      consumes:
+      - application/json
+      description: Verify email
+      parameters:
+      - description: Token
+        in: path
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.Response-string'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_savioruz_smrv2-api_internal_dao_model.ErrorResponse'
+      summary: Verify Email
       tags:
       - Auth
   /schedules:

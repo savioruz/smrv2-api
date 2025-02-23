@@ -18,6 +18,7 @@ type UserSchedulesResponse struct {
 	Lecturer     string `json:"lecturer,omitempty"`
 	StudyProgram string `json:"study_program"`
 	Semester     string `json:"semester"`
+	Credits      int32  `json:"credits"`
 }
 
 type UserSchedulesSyncRequest struct {
