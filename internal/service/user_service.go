@@ -191,13 +191,17 @@ func (s *UserServiceImpl) Login(ctx context.Context, request *model.UsersLoginRe
 		return nil, helper.ValidationError(err)
 	}
 
+	if !strings.Contains(request.Email, "@webmail.uad.ac.id") {
+		return nil, helper.SingleError("email", "INVALID_DOMAIN")
+	}
+
 	tx := s.DB.WithContext(ctx).Begin()
 	defer tx.Rollback()
 
 	user, err := s.UserRepository.GetByEmail(tx, request.Email)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, helper.SingleError("credentials", "INVALID")
+			return nil, helper.SingleError("user", "NOT_FOUND")
 		}
 		return nil, helper.ServerError(s.Log, "Failed to get user")
 	}
@@ -208,7 +212,7 @@ func (s *UserServiceImpl) Login(ctx context.Context, request *model.UsersLoginRe
 
 	ok, err := helper.CompareEncryptedPassword(s.Viper, user.Password, request.Password)
 	if err != nil || !ok {
-		return nil, helper.SingleError("credentials", "z")
+		return nil, helper.SingleError("credentials", "INVALID")
 	}
 
 	accessToken, err := s.Jwt.GenerateAccessToken(user.ID, user.Email, user.Level)
