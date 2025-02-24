@@ -121,6 +121,7 @@ definitions:
       email:
         type: string
       password:
+        minLength: 6
         type: string
     required:
     - email
