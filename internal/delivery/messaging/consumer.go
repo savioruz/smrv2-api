@@ -54,9 +54,37 @@ func (c *Consumer) Consume(ctx context.Context, queueName string, handler func([
 
 	go func() {
 		for msg := range msgs {
+			headers := msg.Headers
+			if headers == nil {
+				headers = make(amqp.Table)
+			}
+			retryCount, _ := headers["retry_count"].(int32)
+
 			if err := handler(msg.Body); err != nil {
-				c.log.Errorf("Failed to process message: %v", err)
-				msg.Nack(false, true)
+				retryCount++
+
+				if retryCount >= 5 {
+					c.log.Errorf("Message failed after %d attempts, discarding: %v", retryCount, err)
+					msg.Nack(false, false) // Don't requeue
+					continue
+				}
+
+				c.log.Warnf("Failed to process message (attempt %d/3): %v", retryCount, err)
+				headers["retry_count"] = retryCount
+
+				ch.PublishWithContext(ctx,
+					"",             // exchange
+					msg.RoutingKey, // routing key
+					false,          // mandatory
+					false,          // immediate
+					amqp.Publishing{
+						ContentType: msg.ContentType,
+						Body:        msg.Body,
+						Headers:     headers,
+					},
+				)
+
+				msg.Ack(false)
 				continue
 			}
 

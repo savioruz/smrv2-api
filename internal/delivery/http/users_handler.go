@@ -1,6 +1,8 @@
 package http
 
 import (
+	"fmt"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/savioruz/smrv2-api/internal/dao/model"
 	"github.com/savioruz/smrv2-api/internal/service"
@@ -147,7 +149,7 @@ func (h *UserHandlerImpl) VerifyEmail(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(helper.SingleError("params", "INVALID_FORMAT"))
 	}
 
-	response, err := h.UserService.VerifyEmail(ctx.Context(), request)
+	_, err := h.UserService.VerifyEmail(ctx.Context(), request)
 	if err != nil {
 		errResp, ok := err.(*helper.ErrorResponse)
 		if !ok {
@@ -161,7 +163,8 @@ func (h *UserHandlerImpl) VerifyEmail(ctx *fiber.Ctx) error {
 		return ctx.Status(status).JSON(errResp)
 	}
 
-	return ctx.Status(fiber.StatusOK).JSON(response)
+	link := fmt.Sprintf("https://simeru.vercel.app/auth/login?ref=https%%3A%%2F%%2Fsimeru-scraper.koyeb.app&id=%s", request.Token)
+	return ctx.Redirect(link, fiber.StatusTemporaryRedirect)
 }
 
 // @Summary Reset Password
