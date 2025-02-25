@@ -22,7 +22,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 COPY --from=builder /build/smrv2-api /app/
-COPY .env /app/
 
 RUN chmod +x /app/smrv2-api
 
