@@ -284,6 +284,7 @@ func (s *UserServiceImpl) VerifyEmail(ctx context.Context, request *model.UsersV
 	}
 
 	user.IsVerified = true
+	user.VerificationToken = ""
 	if err := s.UserRepository.Update(tx, user); err != nil {
 		return nil, helper.ServerError(s.Log, "Failed to update user")
 	}
@@ -352,6 +353,10 @@ func (s *UserServiceImpl) RequestResetPassword(ctx context.Context, request *mod
 			return nil, helper.SingleError("user", "NOT_FOUND")
 		}
 		return nil, helper.ServerError(s.Log, "Failed to get user")
+	}
+
+	if user.UpdatedAt.Add(1 * time.Minute).After(time.Now()) {
+		return nil, helper.SingleError("request", "TOO_MANY_REQUESTS")
 	}
 
 	resetPasswordToken := uuid.NewString()
