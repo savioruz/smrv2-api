@@ -48,7 +48,7 @@ func (c *UserConsumer) ConsumeStudyData(ctx context.Context) error {
 
 		c.log.Infof("Processing study data for NIM: %s", message.NIM)
 
-		scraper := scrape.NewScrape(30)
+		scraper := scrape.NewScrape(60)
 		if err := scraper.Initialize(); err != nil {
 			c.log.Errorf("Failed to initialize scraper when processing study data for NIM %s: %v", message.NIM, err)
 			return err
