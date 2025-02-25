@@ -69,7 +69,7 @@ func (c *Consumer) Consume(ctx context.Context, queueName string, handler func([
 					continue
 				}
 
-				c.log.Warnf("Failed to process message (attempt %d/3): %v", retryCount, err)
+				c.log.Warnf("Failed to process message (attempt %d/5): %v", retryCount, err)
 				headers["retry_count"] = retryCount
 
 				ch.PublishWithContext(ctx,
