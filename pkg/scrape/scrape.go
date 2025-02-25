@@ -24,14 +24,11 @@ func NewScrape(timeout int) *Scrape {
 func (s *Scrape) Initialize() error {
 	opts := append(
 		chromedp.DefaultExecAllocatorOptions[:],
-		chromedp.Flag("headless", true),
-		chromedp.Flag("disable-gpu", true),
-		chromedp.Flag("no-sandbox", true),
+		chromedp.DisableGPU,
+		chromedp.Headless,
+		chromedp.NoSandbox,
 		chromedp.Flag("disable-dev-shm-usage", true),
 		chromedp.Flag("disable-setuid-sandbox", true),
-		chromedp.Flag("remote-debugging-port", "9222"),
-		chromedp.Flag("remote-debugging-address", "0.0.0.0"),
-		chromedp.Flag("disable-crash-reporter", true),
 		chromedp.Flag("disable-notifications", true),
 		chromedp.Flag("disable-extensions", true),
 		chromedp.Flag("disable-sync", true),
@@ -41,6 +38,7 @@ func (s *Scrape) Initialize() error {
 		chromedp.Flag("blink-settings", "imagesEnabled=false"),
 		chromedp.Flag("memory-pressure-off", true),
 		chromedp.Flag("disable-software-rasterizer", true),
+		chromedp.Flag("window-size", "800,600"),
 	)
 
 	// Create allocator context
