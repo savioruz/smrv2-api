@@ -25,7 +25,11 @@ COPY --from=builder /build/smrv2-api /app/
 
 RUN chmod +x /app/smrv2-api
 
-EXPOSE 3000
+ENV CHROME_PATH=/headless-shell/chrome \
+    CHROME_REMOTE_DEBUGGING_PORT=9222 \
+    CHROME_REMOTE_DEBUGGING_ADDRESS=0.0.0.0
+
+EXPOSE 3000 9222
 
 ENTRYPOINT ["dumb-init", "--"]
 
