@@ -8,6 +8,7 @@ services:
     container_name: smrv2-api
     ports:
       - "3000:3000"
+      - "9222:9222"
     environment:
       - APP_ENV=development
       - APP_PORT=3000
