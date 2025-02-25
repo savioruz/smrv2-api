@@ -30,7 +30,9 @@ func (s *Scrape) Initialize() error {
 		chromedp.Flag("disable-dev-shm-usage", true),
 		chromedp.Flag("disable-setuid-sandbox", true),
 		chromedp.Flag("remote-debugging-port", "9222"),
-		chromedp.Flag("remote-debugging-address", "127.0.0.1"),
+		chromedp.Flag("remote-debugging-address", "0.0.0.0"),
+		chromedp.Flag("disable-crash-reporter", true),
+		chromedp.Flag("disable-notifications", true),
 		chromedp.Flag("disable-extensions", true),
 		chromedp.Flag("disable-sync", true),
 		chromedp.Flag("disable-background-networking", true),
@@ -39,7 +41,6 @@ func (s *Scrape) Initialize() error {
 		chromedp.Flag("blink-settings", "imagesEnabled=false"),
 		chromedp.Flag("memory-pressure-off", true),
 		chromedp.Flag("disable-software-rasterizer", true),
-		chromedp.WindowSize(800, 600),
 	)
 
 	// Create allocator context
@@ -60,12 +61,16 @@ func (s *Scrape) Initialize() error {
 	s.ctx = ctx
 	s.cancel = cancel
 
-	// Ensure browser is started
-	if err := chromedp.Run(ctx); err != nil {
-		return err
+	var err error
+	for i := 0; i < 3; i++ {
+		err = chromedp.Run(ctx)
+		if err == nil {
+			return nil
+		}
+		time.Sleep(time.Second * 2)
 	}
 
-	return nil
+	return err
 }
 
 func (s *Scrape) Cleanup() {
