@@ -314,7 +314,13 @@ func (s *UserServiceImpl) ResetPassword(ctx context.Context, request *model.User
 		return nil, helper.ServerError(s.Log, "Failed to get user")
 	}
 
-	user.Password = request.Password
+	password, err := helper.EncryptPassword(s.Viper, request.Password)
+	if err != nil {
+		return nil, helper.ServerError(s.Log, "Failed to encrypt password")
+	}
+
+	user.Password = password
+	user.ResetPasswordToken = ""
 	if err := s.UserRepository.Update(tx, user); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, helper.SingleError("user", "NOT_FOUND")
@@ -365,7 +371,7 @@ func (s *UserServiceImpl) RequestResetPassword(ctx context.Context, request *mod
 	var replaceEmail = struct {
 		Link string
 	}{
-		Link: fmt.Sprintf("https://simeru.vercel.app/auth/reset?ref=https%%3A%%2F%%2Fsimeru-scraper.koyeb.app&id=%s", resetPasswordToken),
+		Link: fmt.Sprintf("https://simeru.vercel.app/auth/reset?ref=https%%3A%%2F%%2Fsmrv2.svrz.xyz&id=%s", resetPasswordToken),
 	}
 
 	tmpl, err := template.ParseFS(templateFS, "template/verify_email.html")
