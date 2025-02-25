@@ -48,48 +48,72 @@ func (c *UserConsumer) ConsumeStudyData(ctx context.Context) error {
 
 		c.log.Infof("Processing study data for NIM: %s", message.NIM)
 
-		scraper := scrape.NewScrape(60)
+		scraper := scrape.NewScrape(180) // 3 minutes timeout
 		if err := scraper.Initialize(); err != nil {
-			c.log.Errorf("Failed to initialize scraper when processing study data for NIM %s: %v", message.NIM, err)
+			c.log.Errorf("Failed to initialize scraper: %v", err)
 			return err
 		}
 		defer scraper.Cleanup()
 
-		// Login with the received credentials
-		err := scraper.Login(ctx, scrape.Identity{
-			NIM:      message.NIM,
-			Password: message.Password,
-		})
-		if err != nil {
-			c.log.Errorf("Failed to login for NIM %s: %v", message.NIM, err)
-			return err
-		}
+		loginCtx, loginCancel := context.WithTimeout(ctx, 60*time.Second)
+		defer loginCancel()
 
-		// Add small delay after login to ensure session is established
-		time.Sleep(2 * time.Second)
-
-		// Get student data
-		studentData, err := scraper.GetStudentData(ctx)
-		if err != nil {
-			if err == context.DeadlineExceeded {
-				c.log.Errorf("Timeout while getting student data for NIM %s", message.NIM)
-				return fmt.Errorf("timeout while fetching student data")
+		var err error
+		for attempts := 1; attempts <= 3; attempts++ {
+			err = scraper.Login(loginCtx, scrape.Identity{
+				NIM:      message.NIM,
+				Password: message.Password,
+			})
+			if err == nil {
+				break
 			}
-			c.log.Errorf("Failed to get student data: %v", err)
-			return err
+			if attempts < 3 {
+				time.Sleep(time.Duration(attempts) * 5 * time.Second)
+				c.log.Warnf("Retry %d: Login failed for NIM %s: %v", attempts, message.NIM, err)
+			}
+		}
+		if err != nil {
+			return fmt.Errorf("all login attempts failed: %v", err)
 		}
 
-		// Get study plans
-		studyPlans, err := scraper.GetStudyPlans(ctx)
+		time.Sleep(5 * time.Second)
+
+		dataCtx, dataCancel := context.WithTimeout(ctx, 90*time.Second)
+		defer dataCancel()
+
+		var studentData *scrape.Student
+		for attempts := 1; attempts <= 3; attempts++ {
+			studentData, err = scraper.GetStudentData(dataCtx)
+			if err == nil {
+				break
+			}
+			if attempts < 3 {
+				time.Sleep(time.Duration(attempts) * 5 * time.Second)
+				c.log.Warnf("Retry %d: Failed to get student data: %v", attempts, err)
+			}
+		}
 		if err != nil {
-			c.log.Errorf("Failed to get study plans for NIM %s: %v", message.NIM, err)
-			return err
+			return fmt.Errorf("failed to get student data after retries: %v", err)
+		}
+
+		var studyPlans []scrape.StudyPlan
+		for attempts := 1; attempts <= 3; attempts++ {
+			studyPlans, err = scraper.GetStudyPlans(dataCtx)
+			if err == nil {
+				break
+			}
+			if attempts < 3 {
+				time.Sleep(time.Duration(attempts) * 5 * time.Second)
+				c.log.Warnf("Retry %d: Failed to get study plans: %v", attempts, err)
+			}
+		}
+		if err != nil {
+			return fmt.Errorf("failed to get study plans after retries: %v", err)
 		}
 
 		// Process the data
 		if err := c.studyService.ProcessStudyData(ctx, studentData, studyPlans); err != nil {
-			c.log.Errorf("Failed to process study data: %v", err)
-			return err
+			return fmt.Errorf("failed to process study data: %v", err)
 		}
 
 		if message.SendEmail {
