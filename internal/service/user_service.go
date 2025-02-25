@@ -19,7 +19,6 @@ import (
 	"github.com/savioruz/smrv2-api/pkg/helper"
 	"github.com/savioruz/smrv2-api/pkg/jwt"
 	"github.com/savioruz/smrv2-api/pkg/mail"
-	"github.com/savioruz/smrv2-api/pkg/scrape"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gorm.io/gorm"
@@ -87,13 +86,6 @@ func (s *UserServiceImpl) Register(ctx context.Context, request *model.UsersRegi
 
 	tx := s.DB.WithContext(ctx).Begin()
 	defer tx.Rollback()
-
-	// Initialize scraperNewScrape(30)
-	scraper := scrape.NewScrape(30)
-	if err := scraper.Initialize(); err != nil {
-		return nil, helper.ServerError(s.Log, "Failed to initialize scraper")
-	}
-	defer scraper.Cleanup()
 
 	// Check if user exists
 	user, err := s.UserRepository.GetByEmail(tx, request.Email)
