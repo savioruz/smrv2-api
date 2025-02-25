@@ -10,14 +10,19 @@ services:
       - "3000:3000"
       - "9222:9222"
     environment:
-      - APP_ENV=development
+      - APP_ENV=${APP_ENV:-development}
       - APP_PORT=3000
+      - APP_NAME=smrv2-api
+      - APP_DOMAIN=${APP_DOMAIN:-localhost}
+      - APP_LOG_LEVEL=${APP_LOG_LEVEL:-1}
+      - APP_KEY_PASSWORD=${APP_KEY_PASSWORD:-secret}
+      - APP_SALT_PASSWORD=${APP_SALT_PASSWORD:-secret}
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USER=${DB_USER:-postgres}
       - DB_PASSWORD=${DB_PASSWORD:-postgres}
       - DB_NAME=${DB_NAME:-smrv2}
-      - DB_SSL_MODE=disable
+      - DB_SSL_MODE=${DB_SSL_MODE:-disable}
       - DB_TIMEZONE=Asia/Jakarta
       - REDIS_HOST=redis
       - REDIS_PORT=6379
@@ -28,6 +33,13 @@ services:
       - RABBITMQ_USERNAME=${RABBITMQ_USERNAME:-guest}
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-guest}
       - RABBITMQ_VHOST=/
+      - SMTP_HOST=${SMTP_HOST:-smtp.gmail.com}
+      - SMTP_PORT=${SMTP_PORT:-465}
+      - SMTP_USERNAME=${SMTP_USERNAME:-your-email@gmail.com}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-your-app-password}
+      - JWT_SECRET=${JWT_SECRET:-your-jwt-secret}
+      - JWT_ACCESS_EXPIRY=${JWT_ACCESS_EXPIRY:-1d}
+      - JWT_REFRESH_EXPIRY=${JWT_REFRESH_EXPIRY:-30d}
     depends_on:
       - postgres
       - redis
