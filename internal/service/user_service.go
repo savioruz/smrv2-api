@@ -314,7 +314,13 @@ func (s *UserServiceImpl) ResetPassword(ctx context.Context, request *model.User
 		return nil, helper.ServerError(s.Log, "Failed to get user")
 	}
 
-	user.Password = request.Password
+	password, err := helper.EncryptPassword(s.Viper, request.Password)
+	if err != nil {
+		return nil, helper.ServerError(s.Log, "Failed to encrypt password")
+	}
+
+	user.Password = password
+	user.ResetPasswordToken = ""
 	if err := s.UserRepository.Update(tx, user); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, helper.SingleError("user", "NOT_FOUND")
