@@ -163,7 +163,7 @@ func (h *UserHandlerImpl) VerifyEmail(ctx *fiber.Ctx) error {
 		return ctx.Status(status).JSON(errResp)
 	}
 
-	link := fmt.Sprintf("https://simeru.vercel.app/auth/login?ref=https%%3A%%2F%%2Fsimeru-scraper.koyeb.app&id=%s", request.Token)
+	link := fmt.Sprintf("https://simeru.vercel.app/auth/login?ref=https%%3A%%2F%%2Fsmrv2.svrz.xyz&id=%s", request.Token)
 	return ctx.Redirect(link, fiber.StatusTemporaryRedirect)
 }
 

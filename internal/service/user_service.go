@@ -371,7 +371,7 @@ func (s *UserServiceImpl) RequestResetPassword(ctx context.Context, request *mod
 	var replaceEmail = struct {
 		Link string
 	}{
-		Link: fmt.Sprintf("https://simeru.vercel.app/auth/reset?ref=https%%3A%%2F%%2Fsimeru-scraper.koyeb.app&id=%s", resetPasswordToken),
+		Link: fmt.Sprintf("https://simeru.vercel.app/auth/reset?ref=https%%3A%%2F%%2Fsmrv2.svrz.xyz&id=%s", resetPasswordToken),
 	}
 
 	tmpl, err := template.ParseFS(templateFS, "template/verify_email.html")
