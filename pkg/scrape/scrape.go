@@ -24,7 +24,6 @@ func NewScrape(timeout int) *Scrape {
 func (s *Scrape) Initialize() error {
 	opts := append(
 		chromedp.DefaultExecAllocatorOptions[:],
-		chromedp.UserAgent("Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0"),
 		chromedp.Flag("headless", true),
 		chromedp.Flag("disable-gpu", true),
 		chromedp.Flag("no-sandbox", true),
